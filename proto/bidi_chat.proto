@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package bidichat;
+
+service BidiChatStream {
+  rpc Chat(stream Message) returns (stream Message) {}
+}
+
+message Message {
+  string user = 1;
+  string message = 2;
+}
