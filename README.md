@@ -13,7 +13,15 @@ A wrapper utility to simplify bidirectional grpc stream with a server/client wra
 1. Add `grpc_bidi_wrapper.hpp` to your project's include directory.
 > **Warning**
 >
-> grpc_bidi_wrapper uses the gRPC includes and assumes gRPC is properly linked with the target it is building with. 
+> grpc_bidi_wrapper uses the gRPC includes and assumes gRPC is properly linked with the target it is building with.
+
+2. The `grpc_bidi_wrapper.hpp` uses `proto/bid-chat.proto`, and overrides the corresponding `Chat` rpc.
+https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/proto/bidi_chat.proto#L6
+If you rename the RPC, make sure to override
+
+   a. https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/include/grpc_bidi_wrapper.hpp#L131
+   b. https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/include/grpc_bidi_wrapper.hpp#L165
+   c. https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/include/grpc_bidi_wrapper.hpp#L621
 
 ## Examples
 
