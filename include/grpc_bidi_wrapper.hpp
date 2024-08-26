@@ -182,11 +182,6 @@ namespace masesk
                 return;
             // set it that it has been shutdown
             done_ = true;
-            // signal last write
-            this->StartWritesDone();
-
-            // remove hold from thread
-            this->RemoveHold();
 
             // shutdown queue (depends on shutdown flag here)
             queue.shutdown();
