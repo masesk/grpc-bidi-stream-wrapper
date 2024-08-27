@@ -109,7 +109,7 @@ namespace masesk
     public:
         /// @brief Default constructor
         /// @param read_callback - Callback for when messages are recevied. Should only use copy parameters.
-        explicit StreamerClient(const std::function<void(ReaderType)> &read_callback) : read_callback_(read_callback)
+        explicit StreamerClient(const std::function<void(ReaderType)> &read_callback, const std::function<void(grpc::ClientContext* context, typename ServiceType::Stub* stub, StreamerClient<ReaderType, WriterType, ServiceType> *client)> initialize_callback) : read_callback_(read_callback), initialize_callback_(initialize_callback)
         {
             context_ = std::make_unique<ClientContext>();
         }
@@ -126,9 +126,8 @@ namespace masesk
             // set the context to be ready and not fail fast if it can't conenct
             context_->set_wait_for_ready(true);
 
-            // setup the async to be
-            // @todo change Chat to your rpc name
-            stub->async()->Chat(context_.get(), this);
+            // fire the callback to assign the RPC handler to this instance of streamer client
+            initialize_callback_(context_.get(), stub, this);
 
             // create writer thread
             std::thread writer_thread([&]
@@ -160,9 +159,8 @@ namespace masesk
             // set not to fail when not ready
             context_->set_wait_for_ready(true);
 
-            // assign the callback instane to grpc
-            // @TODO: Change BidiStream to your rpc name
-            stub->async()->Chat(context_.get(), this);
+            // fire the callback to reassign the new pointers to the correct RPC handler
+            initialize_callback_(context_.get(), stub, this);
 
             // start reading again
             this->StartRead(&reader_item);
@@ -273,6 +271,11 @@ namespace masesk
 
         /// @brief Callback method to be triggered if a new message arrives
         std::function<void(ReaderType)> read_callback_;
+
+        /// @brief initialize callback when the stub is set or reset
+        std::function<void(grpc::ClientContext* context, typename ServiceType::Stub* stub, StreamerClient<ReaderType, WriterType, ServiceType> *client)> initialize_callback_;
+
+        
     };
 
     /// @brief A wrapper for reliable client connection to the server
@@ -286,7 +289,7 @@ namespace masesk
         /// @brief Default constructor of Wrapper
         /// @param address - Address to be used with grpc, usually in "host:port" format
         /// @param read_callback - Callback function to be triggered when a message arrives from the server
-        BidiClientWrapper(const std::string &address, const std::function<void(ReaderType)> read_callback) : address_(address), streamerClient(read_callback), read_callback_(read_callback)
+        BidiClientWrapper(const std::string &address, const std::function<void(ReaderType)> read_callback, const std::function<void(grpc::ClientContext* context, typename ServiceType::Stub* stub, StreamerClient<ReaderType, WriterType, ServiceType> *client)> initialize_callback) : address_(address), streamerClient(read_callback, initialize_callback), read_callback_(read_callback)
         {
             // constructor calls initialize to setup connection listener. This method can become public if needed
             Initialize();
@@ -611,7 +614,8 @@ namespace masesk
     class BidiServerWrapper final : public ServiceType::CallbackService
     {
     public:
-        explicit BidiServerWrapper(const std::function<void(ReaderType, StreamerServerClient<ReaderType, WriterType, ServiceType> *)> read_callback = 0) : read_callback_(read_callback)
+        explicit BidiServerWrapper(
+        const std::function<void(ReaderType, StreamerServerClient<ReaderType, WriterType, ServiceType> *)> read_callback = 0) : read_callback_(read_callback)
         {
         }
         /// @brief Callback used for overriding route chat rpc
@@ -642,6 +646,9 @@ namespace masesk
     private:
         /// @brief callback for all read operations
         std::function<void(ReaderType, StreamerServerClient<ReaderType, WriterType, ServiceType> *)> read_callback_;
+
+        /// @brief callback for all read operations
+        std::function<void(typename ServiceType::Stub*)> initialize_callback_;
 
         /// @brief list of connected and active clients
         std::list<StreamerServerClient<ReaderType, WriterType, ServiceType> *> clients;

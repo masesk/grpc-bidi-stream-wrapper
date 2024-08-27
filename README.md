@@ -19,9 +19,7 @@ A wrapper utility to simplify bidirectional grpc stream with a server/client wra
 https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/proto/bidi_chat.proto#L6
 If you rename the RPC, make sure to override
 
-   a. https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/include/grpc_bidi_wrapper.hpp#L131
-   b. https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/include/grpc_bidi_wrapper.hpp#L165
-   c. https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/include/grpc_bidi_wrapper.hpp#L621
+   a. https://github.com/masesk/grpc-bidi-stream-wrapper/blob/cc544c6f265f165eddca0becc7a8f6d2cb069385/include/grpc_bidi_wrapper.hpp#L621
 
 ## Examples
 

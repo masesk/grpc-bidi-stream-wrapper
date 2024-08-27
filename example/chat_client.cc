@@ -38,8 +38,14 @@ int main(int argc, char ** argv) {
     std::cout <<  message.user() << ": " << message.message() << std::endl;
   };
 
+  // initialize callback to setup the Chat handler to the client pointer
+  // Chat is the name of the RPC and can be changed from here
+  auto initialize_callback = [](grpc::ClientContext* context, bidichat::BidiChatStream::Stub* stub, masesk::StreamerClient<bidichat::Message, bidichat::Message, bidichat::BidiChatStream> *client){
+    stub->async()->Chat(context, client);
+  };
+
   // create the chat service
-  masesk::BidiClientWrapper < bidichat::Message, bidichat::Message, bidichat::BidiChatStream > chat("localhost:50051", read_callback);
+  masesk::BidiClientWrapper < bidichat::Message, bidichat::Message, bidichat::BidiChatStream > chat("localhost:50051", read_callback, initialize_callback);
 
   // create a detached thread that continously asks the user for input
   std::thread writer([ &username, &chat ] {
