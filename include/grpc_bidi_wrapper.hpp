@@ -611,20 +611,15 @@ namespace masesk
     };
 
     template <class ReaderType, class WriterType, typename ServiceType>
-    class BidiServerWrapper final : public ServiceType::CallbackService
+    class BidiServerWrapper
     {
     public:
         explicit BidiServerWrapper(
         const std::function<void(ReaderType, StreamerServerClient<ReaderType, WriterType, ServiceType> *)> read_callback = 0) : read_callback_(read_callback)
         {
         }
-        /// @brief Callback used for overriding route chat rpc
-        /// @param context - Context generated for this channel
-        /// @todo Change Chat to the corresponding RPC name used in proto
-        /// @return - a new instance of StreamerServerClient
-        grpc::ServerBidiReactor<ReaderType, WriterType> *Chat(
-            grpc::CallbackServerContext *context) override
-        {
+
+        grpc::ServerBidiReactor<ReaderType, WriterType> * Initialize(grpc::CallbackServerContext *context){
             return new StreamerServerClient<ReaderType, WriterType, ServiceType>(mutex, clients, read_callback_, context);
         }
 
